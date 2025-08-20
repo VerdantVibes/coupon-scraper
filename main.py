@@ -120,27 +120,69 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
         print(f"Validating coupon {i}/{len(coupon_codes)}: {coupon}")
         
         try:
-            # Run validator.js script for each coupon using Popen for better encoding control
-            process = subprocess.Popen([
-                'node', 'validator.js',
-                f'--coupon={coupon}',
-                f'--domain={target_site}'
-            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-               creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-               env=dict(os.environ, NODE_OPTIONS='--max-old-space-size=4096'))
+            # Run validator.js script for each coupon using a more robust approach
+            import tempfile
+            import sys
+            
+            # Create a temporary script to handle encoding properly
+            temp_script = f"""
+import subprocess
+import sys
+import os
+
+try:
+    result = subprocess.run([
+        'node', 'validator.js',
+        '--coupon={coupon}',
+        '--domain={target_site}'
+    ], capture_output=True, text=True, encoding='utf-8', errors='ignore', 
+       env=dict(os.environ, NODE_OPTIONS='--max-old-space-size=4096'))
+    
+    print(f"RETURNCODE:{result.returncode}")
+    print(f"STDOUT:{result.stdout}")
+    print(f"STDERR:{result.stderr}")
+    sys.exit(0)
+except Exception as e:
+    print(f"ERROR:{str(e)}")
+    sys.exit(1)
+"""
+            
+            # Write temporary script
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+                f.write(temp_script)
+                temp_file = f.name
             
             try:
-                stdout, stderr = process.communicate(timeout=120)  # 2 minute timeout
-                returncode = process.returncode
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-                print(f"⏰ Validation timeout for {coupon}")
-                continue
-            
-            # Decode output manually to handle encoding issues
-            stdout_text = stdout.decode('utf-8', errors='ignore') if stdout else ""
-            stderr_text = stderr.decode('utf-8', errors='ignore') if stderr else ""
+                # Run the temporary script
+                result = subprocess.run([sys.executable, temp_file], 
+                                      capture_output=True, text=True, encoding='utf-8', errors='ignore')
+                
+                # Parse the output
+                output_lines = result.stdout.split('\n')
+                returncode = None
+                stdout_text = ""
+                stderr_text = ""
+                
+                for line in output_lines:
+                    if line.startswith('RETURNCODE:'):
+                        returncode = int(line.split(':', 1)[1])
+                    elif line.startswith('STDOUT:'):
+                        stdout_text = line.split(':', 1)[1] if ':' in line else ""
+                    elif line.startswith('STDERR:'):
+                        stderr_text = line.split(':', 1)[1] if ':' in line else ""
+                    elif line.startswith('ERROR:'):
+                        stderr_text = line.split(':', 1)[1] if ':' in line else ""
+                        returncode = 1
+                
+                if returncode is None:
+                    returncode = 1
+                    
+            finally:
+                # Clean up temporary file
+                try:
+                    os.unlink(temp_file)
+                except:
+                    pass
             
             # Check if validation was successful
             if returncode == 0:
@@ -179,14 +221,6 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
             print(f"❌ Encoding error validating {coupon}: {str(e)}")
         except Exception as e:
             print(f"❌ Error validating {coupon}: {str(e)}")
-        finally:
-            # Ensure process is cleaned up
-            try:
-                if 'process' in locals() and process.poll() is None:
-                    process.terminate()
-                    process.wait(timeout=5)
-            except:
-                pass
     
     # Save valid coupons to JSON file
     with open('valid_coupons.json', 'w') as f:
