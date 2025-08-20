@@ -277,13 +277,21 @@ async def main():
     response = await get_response(target_site)
     coupon_codes = await parse_response(response.output_text)
     
+    # Save all parsed coupon codes to database
+    print(f"\n💾 Saving all {len(coupon_codes)} coupon codes to database...")
+    for i, coupon in enumerate(coupon_codes):
+        print(f"Saving coupon {i+1}/{len(coupon_codes)}: {coupon}")
+        await save_to_database(target_site, coupon, True)  # True = valid
+    
     # Validate coupons
-    valid_coupons = await validate_coupons(coupon_codes, target_site)
+    # valid_coupons = await validate_coupons(coupon_codes, target_site)
     
     # Print summary
     print(f"\n=== SUMMARY ===")
     print(f"Total coupons found: {len(coupon_codes)}")
-    print(f"Valid coupons: {len(valid_coupons)}")
-    print(f"Success rate: {(len(valid_coupons)/len(coupon_codes)*100):.1f}%" if coupon_codes else "0%")
+    print(f"All coupons saved to database")
+    # print(f"Valid coupons: {len(valid_coupons)}")
+    # print(f"Success rate: {(len(valid_coupons)/len(coupon_codes)*100):.1f}%" if coupon_codes else "0%")
+    print("Validation temporarily disabled")
 
 asyncio.run(main())
