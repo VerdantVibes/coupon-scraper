@@ -69,11 +69,9 @@ let page;
             fs.writeFileSync('./output/result.json', JSON.stringify({logs, couponIsValid: couponIsValid}, null, 2));
         }else {
             log('[⏳] Starting headless-browser...');
-                    // Create unique user data directory for each process
-        const browserProcessId = process.pid || Date.now();
-        const userDataDir = `./pw-user-${browserProcessId}`;
+            const userDataDir = './pw-user';
 
-        const browserCtx = await firefox.launchPersistentContext(userDataDir, {
+            const browserCtx = await firefox.launchPersistentContext(userDataDir, {
                 headless: true,
                 ...(proxy && {proxy}),
                 locale: 'en-US',
@@ -170,10 +168,7 @@ let page;
                 error(`❌ Unexpected error: ${e.message}`);
             }
             await clearSiteStorage(page);
-            
-            // Create unique output directory for each process
-            const outputProcessId = process.pid || Date.now();
-            const outputDir = `./output-${outputProcessId}`;
+            const outputDir = './output';
             if (!fs.existsSync(outputDir)) {
                 fs.mkdirSync(outputDir, {recursive: true});
             }
