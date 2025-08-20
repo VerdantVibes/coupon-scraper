@@ -58,7 +58,7 @@ async def get_response(site: str):
         tools=[{"type": "web_search_preview"}],
         input=f"find all working coupon on {site}"
     )
-    with open('response.json', 'w') as f:
+    with open('response.json', 'w', encoding='utf-8') as f:
         json.dump(response.model_dump(), f, indent=2)
         print(f"Response saved to response.json")
     return response
@@ -80,7 +80,7 @@ async def parse_response(response_text):
             }
         ]
     )
-    with open('parsed_response.json', 'w') as f:
+    with open('parsed_response.json', 'w', encoding='utf-8') as f:
         json.dump(parsed_response.model_dump(), f, indent=2)
     print(f"Parsed response saved to parsed_response.json")
     list = parsed_response.choices[0].message.parsed
@@ -89,7 +89,7 @@ async def parse_response(response_text):
     coupon_codes = [coupon.code for coupon in list.coupons]
 
     # Save the coupon codes list to JSON
-    with open('coupon_codes.json', 'w') as f:
+    with open('coupon_codes.json', 'w', encoding='utf-8') as f:
         json.dump(coupon_codes, f, indent=2)
 
     print("Coupon codes saved to coupon_codes.json")
@@ -195,7 +195,7 @@ async def validate_coupons(coupon_codes: List[str], target_site: str, max_concur
     # If coupon_codes is empty, try to load from existing JSON file
     if not coupon_codes:
         try:
-            with open('coupon_codes.json', 'r') as f:
+            with open('coupon_codes.json', 'r', encoding='utf-8') as f:
                 coupon_codes = json.load(f)
             print(f"Loaded {len(coupon_codes)} coupon codes from existing coupon_codes.json file")
         except FileNotFoundError:
@@ -241,7 +241,7 @@ async def validate_coupons(coupon_codes: List[str], target_site: str, max_concur
             "site": coupon['site']
         })
     
-    with open('valid_coupons.json', 'w') as f:
+    with open('valid_coupons.json', 'w', encoding='utf-8') as f:
         json.dump(simplified_coupons, f, indent=2)
     
     print(f"\nValidation complete! Found {len(valid_coupons)} valid coupons out of {len(coupon_codes)}")
@@ -271,7 +271,7 @@ async def main():
     
     # Check if the site exists in actions.json
     try:
-        with open('actions.json', 'r') as f:
+        with open('actions.json', 'r', encoding='utf-8') as f:
             actions_data = json.load(f)
         
         if target_site not in actions_data.get('sites', {}):

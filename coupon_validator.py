@@ -52,7 +52,7 @@ async def validate_single_coupon(code: str, domain: str) -> Tuple[bool, str]:
                 if not os.path.exists('./output/result.json'):
                     return False, f"result.json file does not exist. stdout: {stdout_text[:100]}... stderr: {stderr_text[:100]}..."
                     
-                with open('./output/result.json', 'r') as f:
+                with open('./output/result.json', 'r', encoding='utf-8') as f:
                     validation_result = json.load(f)
                 
                 is_valid = validation_result.get('couponIsValid', False)
