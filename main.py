@@ -262,6 +262,29 @@ async def main():
     
     print(f"Target site: {target_site}")
     
+    # Check if the site exists in actions.json
+    try:
+        with open('actions.json', 'r') as f:
+            actions_data = json.load(f)
+        
+        if target_site not in actions_data.get('sites', {}):
+            print(f"❌ Site '{target_site}' not found in actions.json")
+            print("Available sites:")
+            for site in actions_data.get('sites', {}).keys():
+                print(f"  - {site}")
+            print("\nTo add this site, run: python generate_actions.py")
+            return
+        else:
+            print(f"✅ Site '{target_site}' found in actions.json")
+            
+    except FileNotFoundError:
+        print("❌ actions.json file not found")
+        print("Please run: python generate_actions.py")
+        return
+    except json.JSONDecodeError:
+        print("❌ Invalid actions.json file")
+        return
+    
     # Get coupon codes
     response = await get_response(target_site)
     coupon_codes = await parse_response(response.output_text)
