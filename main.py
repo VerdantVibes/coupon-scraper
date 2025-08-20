@@ -52,6 +52,7 @@ async def save_to_database(site: str, code: str, valid: bool):
 
 # First get the response
 async def get_response(site: str):
+    print(f"Getting response for {site}")
     response = await client.responses.create(
         model="gpt-5",
         tools=[{"type": "web_search_preview"}],
@@ -59,10 +60,12 @@ async def get_response(site: str):
     )
     with open('response.json', 'w') as f:
         json.dump(response.model_dump(), f, indent=2)
+        print(f"Response saved to response.json")
     return response
 
 # Now parse the response to extract coupon codes
 async def parse_response(response_text):
+    print(f"Parsing response")
     parsed_response = await client.beta.chat.completions.parse(
         model="gpt-4o-mini",
         response_format=CouponMappingList,
@@ -79,7 +82,7 @@ async def parse_response(response_text):
     )
     with open('parsed_response.json', 'w') as f:
         json.dump(parsed_response.model_dump(), f, indent=2)
-
+    print(f"Parsed response saved to parsed_response.json")
     list = parsed_response.choices[0].message.parsed
 
     # Extract just the coupon code strings
@@ -109,7 +112,7 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
                 'node', 'validator.js',
                 f'--coupon={coupon}',
                 f'--domain={target_site}'
-            ], capture_output=True, text=True, timeout=60, encoding='utf-8', errors='ignore')
+            ], capture_output=True, text=True, encoding='utf-8', errors='ignore')
             
             # Check if validation was successful
             if result.returncode == 0:
