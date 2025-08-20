@@ -97,8 +97,99 @@ async def parse_response(response_text):
     
     return coupon_codes
 
-async def validate_coupons(coupon_codes: List[str], target_site: str):
-    """Validate coupons using validator.js script"""
+async def validate_single_coupon_parallel(coupon: str, target_site: str, index: int, total: int):
+    """Validate a single coupon in parallel"""
+    print(f"Validating coupon {index}/{total}: {coupon}")
+    
+    try:
+        # Set environment variables for better encoding handling
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        env['NODE_OPTIONS'] = '--max-old-space-size=4096'
+        
+        # Run the validator directly
+        process = subprocess.Popen([
+            'node', 'validator.js',
+            f'--coupon={coupon}',
+            f'--domain={target_site}'
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+           env=env, creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+        
+        # Initialize variables
+        returncode = 1
+        stdout_text = ""
+        stderr_text = ""
+        
+        try:
+            stdout, stderr = process.communicate()
+            returncode = process.returncode
+            
+            # Decode output safely
+            stdout_text = stdout.decode('utf-8', errors='ignore') if stdout else ""
+            stderr_text = stderr.decode('utf-8', errors='ignore') if stderr else ""
+            
+        except Exception as e:
+            stderr_text = f"Process error: {str(e)}"
+            returncode = 1
+        
+        # Check if validation was successful
+        if returncode == 0:
+            # Parse the result.json file to check if coupon is valid
+            try:
+                # Find the output directory for this process
+                output_dir = None
+                for item in os.listdir('.'):
+                    if item.startswith('./output-') or item.startswith('output-'):
+                        output_dir = item
+                        break
+                
+                if not output_dir or not os.path.exists(output_dir):
+                    print(f"⚠️ Output directory does not exist for {coupon}")
+                    return None
+                    
+                result_file = os.path.join(output_dir, 'result.json')
+                if not os.path.exists(result_file):
+                    print(f"⚠️ result.json file does not exist for {coupon}")
+                    return None
+                    
+                with open(result_file, 'r') as f:
+                    validation_result = json.load(f)
+                
+                is_valid = validation_result.get('couponIsValid', False)
+                
+                # Save to database
+                if is_valid:
+                    await save_to_database(target_site, coupon, True)
+                
+                if is_valid:
+                    result = {
+                        'code': coupon,
+                        'site': target_site,
+                        'validated_at': validation_result.get('timestamp', ''),
+                        'logs': validation_result.get('logs', [])
+                    }
+                    print(f"✅ {coupon} is VALID!")
+                    return result
+                else:
+                    print(f"❌ {coupon} is INVALID")
+                    return None
+                    
+            except FileNotFoundError:
+                print(f"⚠️ Could not read validation result for {coupon}")
+                return None
+            except json.JSONDecodeError:
+                print(f"⚠️ Invalid JSON in validation result for {coupon}")
+                return None
+        else:
+            print(f"⚠️ Validation failed for {coupon}: {stderr_text}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Error validating {coupon}: {str(e)}")
+        return None
+
+async def validate_coupons(coupon_codes: List[str], target_site: str, max_concurrent: int = 3):
+    """Validate coupons using parallel validator.js processes"""
     valid_coupons = []
     
     # If coupon_codes is empty, try to load from existing JSON file
@@ -114,94 +205,33 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
             print("❌ Error reading coupon_codes.json file")
             return valid_coupons
     
-    print(f"Starting validation for {len(coupon_codes)} coupons on {target_site}")
+    print(f"Starting parallel validation for {len(coupon_codes)} coupons on {target_site}")
+    print(f"Running {max_concurrent} validations simultaneously")
     
-    for i, coupon in enumerate(coupon_codes, 1):
-        print(f"Validating coupon {i}/{len(coupon_codes)}: {coupon}")
+    # Process coupons in batches to control concurrency
+    for i in range(0, len(coupon_codes), max_concurrent):
+        batch = coupon_codes[i:i + max_concurrent]
+        batch_tasks = []
         
-        try:
-            # Set environment variables for better encoding handling
-            env = os.environ.copy()
-            env['PYTHONIOENCODING'] = 'utf-8'
-            env['NODE_OPTIONS'] = '--max-old-space-size=4096'
-            
-            # Run the validator directly
-            process = subprocess.Popen([
-                'node', 'validator.js',
-                f'--coupon={coupon}',
-                f'--domain={target_site}'
-            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-               env=env, creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
-            
-            # Initialize variables
-            returncode = 1
-            stdout_text = ""
-            stderr_text = ""
-            
-            try:
-                stdout, stderr = process.communicate()
-                returncode = process.returncode
-                
-                # Decode output safely
-                stdout_text = stdout.decode('utf-8', errors='ignore') if stdout else ""
-                stderr_text = stderr.decode('utf-8', errors='ignore') if stderr else ""
-                
-                # Debug output
-                print(f"   Return code: {returncode}")
-                if stdout_text:
-                    print(f"   stdout: {stdout_text[:100]}...")
-                if stderr_text:
-                    print(f"   stderr: {stderr_text[:100]}...")
-                    
-
-            except Exception as e:
-                stderr_text = f"Process error: {str(e)}"
-                returncode = 1
-            
-            # Check if validation was successful
-            if returncode == 0:
-                # Parse the result.json file to check if coupon is valid
-                try:
-                    # Check if output directory exists
-                    if not os.path.exists('./output'):
-                        print(f"⚠️ Output directory does not exist for {coupon}")
-                        continue
-                        
-                    if not os.path.exists('./output/result.json'):
-                        print(f"⚠️ result.json file does not exist for {coupon}")
-                        print(f"   stdout: {stdout_text[:200]}...")
-                        print(f"   stderr: {stderr_text[:200]}...")
-                        continue
-                        
-                    with open('./output/result.json', 'r') as f:
-                        validation_result = json.load(f)
-                    
-                    is_valid = validation_result.get('couponIsValid', False)
-                    
-                    # Save to database
-                    if is_valid:
-                        await save_to_database(target_site, coupon, True)
-                    
-                    if is_valid:
-                        valid_coupons.append({
-                            'code': coupon,
-                            'site': target_site,
-                            'validated_at': validation_result.get('timestamp', ''),
-                            'logs': validation_result.get('logs', [])
-                        })
-                        print(f"✅ {coupon} is VALID!")
-                    else:
-                        print(f"❌ {coupon} is INVALID")
-                        
-                except FileNotFoundError:
-                    print(f"⚠️ Could not read validation result for {coupon}")
-                except json.JSONDecodeError:
-                    print(f"⚠️ Invalid JSON in validation result for {coupon}")
-            else:
-                print(f"⚠️ Validation failed for {coupon}: {stderr_text}")
-                
-        except Exception as e:
-            print(f"❌ Error validating {coupon}: {str(e)}")
+        for j, coupon in enumerate(batch):
+            task = validate_single_coupon_parallel(coupon, target_site, i + j + 1, len(coupon_codes))
+            batch_tasks.append(task)
+        
+        # Run batch in parallel
+        print(f"\n🔄 Running batch {i//max_concurrent + 1} ({len(batch)} coupons)...")
+        batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
+        
+        # Process results
+        for result in batch_results:
+            if isinstance(result, Exception):
+                print(f"❌ Exception in validation: {result}")
+            elif result is not None:
+                valid_coupons.append(result)
+        
+        # Small delay between batches to avoid overwhelming the system
+        if i + max_concurrent < len(coupon_codes):
+            print("⏳ Waiting 2 seconds before next batch...")
+            await asyncio.sleep(2)
     
     # Save valid coupons to JSON file
     with open('valid_coupons.json', 'w') as f:
@@ -213,15 +243,31 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
     return valid_coupons
 
 async def main():
-    target_site = "woxer.com"
+    import sys
+    
+    # Get target site from command line argument
+    if len(sys.argv) > 1:
+        target_site = sys.argv[1]
+        # Remove protocol if present (e.g., "https://www.woxer.com" -> "woxer.com")
+        if target_site.startswith(('http://', 'https://')):
+            from urllib.parse import urlparse
+            parsed_url = urlparse(target_site)
+            target_site = parsed_url.netloc
+    else:
+        target_site = "woxer.com"  # Default site
+        print("Usage: python main.py <domain>")
+        print("Example: python main.py woxer.com")
+        print("Example: python main.py https://www.woxer.com")
+        print(f"Using default site: {target_site}")
+    
+    print(f"Target site: {target_site}")
     
     # Get coupon codes
-    # response = await get_response(target_site)
-    # coupon_codes = await parse_response(response.output_text)
-    coupon_codes = []
+    response = await get_response(target_site)
+    coupon_codes = await parse_response(response.output_text)
     
-    # Validate coupons
-    valid_coupons = await validate_coupons(coupon_codes, target_site)
+    # Validate coupons in parallel (3 at a time)
+    valid_coupons = await validate_coupons(coupon_codes, target_site, max_concurrent=3)
     
     # Print summary
     print(f"\n=== SUMMARY ===")
