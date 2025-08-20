@@ -101,6 +101,19 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
     """Validate coupons using validator.js script"""
     valid_coupons = []
     
+    # If coupon_codes is empty, try to load from existing JSON file
+    if not coupon_codes:
+        try:
+            with open('coupon_codes.json', 'r') as f:
+                coupon_codes = json.load(f)
+            print(f"Loaded {len(coupon_codes)} coupon codes from existing coupon_codes.json file")
+        except FileNotFoundError:
+            print("❌ No coupon codes provided and no existing coupon_codes.json file found")
+            return valid_coupons
+        except json.JSONDecodeError:
+            print("❌ Error reading coupon_codes.json file")
+            return valid_coupons
+    
     print(f"Starting validation for {len(coupon_codes)} coupons on {target_site}")
     
     for i, coupon in enumerate(coupon_codes, 1):
@@ -185,11 +198,12 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
     return valid_coupons
 
 async def main():
-    target_site = "woxer.com"
+    target_site = "https://www.woxer.com"
     
     # Get coupon codes
-    response = await get_response(target_site)
-    coupon_codes = await parse_response(response.output_text)
+    # response = await get_response(target_site)
+    # coupon_codes = await parse_response(response.output_text)
+    coupon_codes = []
     
     # Validate coupons
     valid_coupons = await validate_coupons(coupon_codes, target_site)
