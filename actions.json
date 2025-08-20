@@ -1,118 +1,621 @@
 {
-    "defaultWaitTime": 1000,
-    "sites": {
-      "myprotein.ro": {
-        "baseUrl": "https://www.myprotein.ro",
-        "productUrl": "https://www.myprotein.ro/p/sports-nutrition/impact-whey-isolate/12456855/",
-        "actions": [
-          { "name": "acceptedCookie", "selectors": ["#onetrust-accept-btn-handler"], "type": "click", "waitAfter": 3000, "event" : "[⏳] Accepting cookie policy..." },
-          { "name": "addToCart", "selectors": ["#add-to-basket-text"], "type": "click", "waitAfter": 5000, "event" : "[🛒] Adding product to cart..." },
-          { "name": "viewCart", "selectors": ["#view-basket-btn"], "type": "click", "waitAfter": 5000, "event" : "[🛍️] Viewing cart..." },
-          { "name": "enterCoupon", "selectors": ["#promo-code-input"], "type": "fill", "waitAfter": 5000, "event" : "[💳] Entering coupon code..." },
-          { "name": "checkCoupon", "selectors": ["#promo-code-add"], "type": "click", "waitAfter": 5000, "event" : "[✅] Checking coupon code..." }
-        ],
-        "waitTime": 3000,
-        "promoCode": {
-          "elementAlert": "#promo-error-message",
-          "validText": "Ai primit"
+  "defaultWaitTime": 1000,
+  "sites": {
+    "bombas.com": {
+      "baseUrl": "https://www.bombas.com",
+      "productUrl": "https://bombas.com/products/mens-cotton-modal-trunk-underwear-3-pack?variant=toffee-indigo-steel-mix&size=l",
+      "actions": [
+        {
+          "name": "acceptedCookie",
+          "selectors": [
+            "#onetrust-accept-btn-handler"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[⏳] Accepting cookie policy..."
+        },
+        {
+          "name": "declineModal",
+          "selectors": [
+            "button[data-label=\"modal_close\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[❌] Closing modal..."
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            "button[data-cnstrc-btn=\"add_to_cart\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            "a[data-track-label=\"checkout\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 5000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[✅] Checking coupon code..."
         }
-      },
-      "512boutique.com": {
-        "baseUrl": "https://www.512boutique.com",
-        "productUrl": "https://www.512boutique.com/collections/accessories/products/grinchy-hand-freshie",
-        "actions": [
-          { "name": "addToCart", "selectors": ["#addToCart"], "type": "click", "waitAfter": 5000, "event" : "[🛒] Adding product to cart..." },
-          { "name": "viewCart", "selectors": [".ajax-cart__button-view_cart"], "type": "click", "waitAfter": 5000, "event" : "[🛍️] Viewing cart..." },
-          { "name": "checkout", "selectors": ["#checkout"], "type": "click", "waitAfter": 5000, "event" : "[💳] Proceeding to checkout..."  },
-          { "name": "enterCoupon", "selectors": ["input[name=\"reductions\"]"], "type": "fill", "waitAfter": 5000, "event" : "[💳] Entering coupon code..."},
-          { "name": "checkCoupon", "selectors": ["button[aria-label=\"Apply Discount Code\"]"], "type": "click", "waitAfter": 5000, "event" : "[✅] Checking coupon code..." }
-        ],
-        "waitTime": 3000,
-        "promoCode": {
-          "elementAlert": "#app",
-          "validText": "Order discount"
+      ],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
+      }
+    },
+    "puravidabracelets.com": {
+      "baseUrl": "https://www.puravidabracelets.com",
+      "productUrl": "https://www.puravidabracelets.com/products/friendship-ring-bracelet?variant=42460848947286",
+      "actions": [
+        {
+          "name": "addToCart",
+          "selectors": [
+            "button[data-add-to-cart]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            "div[data-cart-summary] a"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 5000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[✅] Checking coupon code..."
         }
-      },
-      "magicspoon.com": {
-        "baseUrl": "https://www.magicspoon.com",
-        "productUrl": "https://www.magicspoon.com/products/variety-6-6-bags-of-granola",
-        "actions": [
-          { "name": "acceptedCookie", "selectors": [".cc-allow"], "type": "click", "waitAfter": 5000, "event" : "[⏳] Accepting cookie policy..." },
-          { "name": "addToCart", "selectors": ["input[name=\"add\"]"], "type": "click", "waitAfter": 5000, "event" : "[🛒] Adding product to cart..." },
-          { "name": "declineModal", "selectors": [".decline"], "type": "click", "waitAfter": 5000, "event" : "[❌] Closing modal..." },
-          { "name": "checkout", "selectors": [".rebuy-cart__checkout-button"], "type": "click", "waitAfter": 5000, "event" : "[💳] Proceeding to checkout..." },
-          { "name": "enterCoupon", "selectors": ["input[name=\"reductions\"]"], "type": "fill", "waitAfter": 5000, "event" :  "[💳] Entering coupon code..." },
-          { "name": "checkCoupon", "selectors": ["button[aria-label=\"Apply Discount Code\"]"], "type": "click", "waitAfter": 5000, "event" : "[✅] Checking coupon code..." }
-  
-        ],
-        "waitTime": 3000,
-        "promoCode": {
-          "elementAlert": "#app",
-          "validText": "Order discount"
+      ],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
+      }
+    },
+    "shopc60.com": {
+      "baseUrl": "https://www.shopc60.com",
+      "productUrl": "https://shopc60.com/products/c60-in-organic-avocado-oil/",
+      "actions": [
+        {
+          "name": "SelectSize",
+          "selectors": [
+            "//li[@data-attribute_name=\"attribute_size\" and @aria-checked=\"false\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛍️] Select size..."
+        },
+        {
+          "name": "SelectPurchaseType",
+          "selectors": [
+            "//li[@data-attribute_name='attribute_purchase-type' and @aria-checked='false' and not(contains(@class, 'disabled'))]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛍️] Select purchase type..."
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            ".single_add_to_cart_button"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            ".btn-coc-checkout"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "#ilikoq"
+          ],
+          "type": "fill",
+          "waitAfter": 10000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            ".coupon-btn"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[✅] Checking coupon code..."
         }
-      },
-      "shopc60.com": {
-        "baseUrl": "https://www.shopc60.com",
-        "productUrl": "https://shopc60.com/products/c60-in-organic-avocado-oil/",
-        "actions": [
-           { "name": "addToCart", "selectors": [".single_add_to_cart_button"], "type": "click", "waitAfter": 5000, "event": "[🛒] Adding product to cart..." },
-           { "name": "checkout", "selectors": [".btn-coc-checkout"], "type": "click", "waitAfter": 5000, "event": "[💳] Proceeding to checkout..." },
-           { "name": "enterCoupon", "selectors": ["#ilikoq"], "type": "fill", "waitAfter": 10000, "event": "[💳] Entering coupon code..." },
-           { "name": "checkCoupon", "selectors": [".coupon-btn"], "type": "click", "waitAfter": 10000, "event": "[✅] Checking coupon code..." }
-        ],
-        "waitTime": 5000,
-        "promoCode": {
-          "elementAlert": "span[name='coupMessage']",
-          "validText": "off on C60"
+      ],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": ".discount",
+        "validText": "-"
+      }
+    },
+    "thousandfell.com": {
+      "baseUrl": "https://www.thousandfell.com",
+      "productUrl": "https://www.thousandfell.com/products/womens-high-court-white",
+      "actions": [
+        {
+          "name": "selectSize",
+          "selectors": [
+            ".product-detail__form__options ul a:not(.unavailable)"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛍️] Select size..."
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            ".addToCart"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            "a.checkout"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 5000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[✅] Checking coupon code..."
         }
-      },
-      "us.suunto.com": {
-        "baseUrl": "https://www.us.suunto.com",
-        "productUrl": "https://us.suunto.com/products/suunto-aqua-light-reef-blue",
-        "actions": [
-          { "name": "acceptedCookie", "selectors": ["#onetrust-accept-btn-handler"], "type": "click", "waitAfter": 5000, "event": "[⏳] Accepting cookie policy..." },
-          { "name": "buyNow", "selectors": [".shopify-payment-button__button"], "type": "click", "waitAfter": 5000, "event": "[\uD83D\uDE80] Buy Now clicked..." },
-          { "name": "enterCoupon", "selectors": ["input[name=\"reductions\"]"], "type": "fill", "waitAfter": 5000, "event": "[💳] Entering coupon code..." },
-          { "name": "checkCoupon", "selectors": ["button[aria-label=\"Apply Discount Code\"]"], "type": "click", "waitAfter": 5000, "event" : "[✅] Checking coupon code..." }
-        ],
-        "waitTime": 5000,
-        "promoCode": {
-          "elementAlert": "#app",
-          "validText": "Order discount"
+      ],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
+      }
+    },
+    "yourparade.com": {
+      "baseUrl": "https://www.yourparade.com",
+      "productUrl": "https://yourparade.com/collections/all-bralettes/products/re-play-new-triangle-bralette-ultra-soft-re-play-premium-plum",
+      "actions": [
+        {
+          "name": "acceptedCookie",
+          "selectors": [
+            "#shopify-pc__banner__btn-accept"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[⏳] Accepting cookie policy..."
+        },
+        {
+          "name": "selectSize",
+          "selectors": [
+            "input[name=\"Size\"]:not(.disabled)"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[🛍️] Select size..."
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            ".product-form__quantity_n_submit button[name=\"add\"]"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "openCart",
+          "selectors": [
+            "#cart-icon-bubble"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[💳] Open cart..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "#discount-code-input"
+          ],
+          "type": "fill",
+          "waitAfter": 10000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "#apply-discount-button"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[✅] Checking coupon code..."
         }
-      },
-      "zennioptical.com": {
-        "baseUrl": "https://www.zennioptical.com",
-        "productUrl": "https://www.zennioptical.com/p/sunglasses-frames/T0149/T01491915",
-        "actions": [
-          { "name": "acceptedCookie", "selectors": ["#onetrust-accept-btn-handler"], "type": "click", "waitAfter": 5000, "event": "[⏳] Accepting cookie policy..." },
-          { "name": "addToCart", "selectors": ["#btn-pdp-add-to-cart"], "type": "click", "waitAfter": 5000, "event" : "[🛒] Adding product to cart..." },
-          { "name": "enterCoupon", "selectors": ["#promo-code"], "type": "fill", "waitAfter": 5000, "event" : "[💳] Entering coupon code..." },
-          { "name": "checkCoupon", "selectors": [".btn-apply-promocode"], "type": "click", "waitAfter": 5000, "event" : "[✅] Checking coupon code..." }
-        ],
-        "waitTime": 3000,
-        "promoCode": {
-          "elementAlert": ".applyPromoCodes",
-          "validText": "APPLIED PROMO CODES"
+      ],
+      "waitTime": 10000,
+      "promoCode": {
+        "elementAlert": ".cart__footer",
+        "validText": "You Save"
+      }
+    },
+    "myprotein.ro": {
+      "baseUrl": "https://www.myprotein.ro",
+      "productUrl": "",
+      "actions": [],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": "",
+        "validText": "CODE_VALID"
+      }
+    },
+    "woxer.com": {
+      "baseUrl": "https://www.woxer.com",
+      "productUrl": "https://woxer.com/products/baller-volt-floral",
+      "actions": [
+        {
+          "name": "acceptedCookie",
+          "selectors": [
+            "#onetrust-close-btn-container"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[⏳] Accepting cookie policy..."
+        },
+        {
+          "name": "selectSize",
+          "selectors": [
+            "//ul[contains(@class, \"product-size-list\")]//li[not(contains(@class, \"unavailable\"))]//label[contains(@class, \"other-swatch-wrapper\")]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[⏳] Select size"
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            "#AddToCart-"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            ".rebuy-cart__checkout-button"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 5000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[✅] Checking coupon code..."
         }
-      },
-      "woxer.com": {
-        "baseUrl": "https://www.woxer.com",
-        "productUrl": "https://woxer.com/products/baller-volt-floral",
-        "actions": [
-          { "name": "acceptedCookie", "selectors": ["#onetrust-close-btn-container"], "type": "click", "waitAfter": 5000, "event": "[⏳] Accepting cookie policy..." },
-          { "name": "selectSize", "selectors": [".other-swatch-wrapper.S"], "type": "click", "waitAfter": 5000, "event": "[⏳] Select size" },
-          { "name": "addToCart", "selectors": ["#AddToCart-"], "type": "click", "waitAfter": 5000, "event": "[🛒] Adding product to cart..." },
-          { "name": "checkout", "selectors": [".bottom_button .rebuy-button.rebuy-cart__checkout-button"], "type": "click", "waitAfter": 5000, "event": "[💳] Proceeding to checkout..." },
-          { "name": "enterCoupon", "selectors": ["input[name=\"reductions\"]"], "type": "fill", "waitAfter": 5000, "event" :  "[💳] Entering coupon code..." },
-          { "name": "checkCoupon", "selectors": ["button[aria-label=\"Apply Discount Code\"]"], "type": "click", "waitAfter": 5000, "event" : "[✅] Checking coupon code..." }
-  
-        ],
-        "waitTime": 5000,
-        "promoCode": {
-          "elementAlert": "div[aria-label=\"Shopping cart\"]",
-          "validText": "Discount code"
+      ],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
+      }
+    },
+    "drinkhydrant.com": {
+      "baseUrl": "https://www.drinkhydrant.com",
+      "productUrl": "https://www.drinkhydrant.com/products/hydration-mix?variant=29809554325548",
+      "actions": [
+        {
+          "name": "SelectOneTimePurchase",
+          "selectors": [
+            "(//button[@role=\"tab\"])[2]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛍️] Selecting one-time purchase option..."
+        },
+        {
+          "name": "declineModal",
+          "selectors": [
+            ".animate-fade-in"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[❌] Closing modal..."
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            "(//button[@data-replo-add-product-variant-to-cart])[2]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            ".rebuy-cart__checkout-button"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 5000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[✅] Checking coupon code..."
         }
+      ],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
+      }
+    },
+    "magicspoon.com": {
+      "baseUrl": "https://www.magicspoon.com",
+      "productUrl": "https://www.magicspoon.com/products/variety-6-6-bags-of-granola",
+      "actions": [
+        {
+          "name": "acceptedCookie",
+          "selectors": [
+            ".cc-allow"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[⏳] Accepting cookie policy..."
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            "input[name=\"add\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "declineModal",
+          "selectors": [
+            ".decline"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[❌] Closing modal..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            ".rebuy-cart__checkout-button",
+            ".carthook_checkout"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 5000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[✅] Checking coupon code..."
+        }
+      ],
+      "waitTime": 3000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
+      }
+    },
+    "jonesroadbeauty.com": {
+      "baseUrl": "https://www.jonesroadbeauty.com",
+      "productUrl": "https://www.jonesroadbeauty.com/products/miracle-balm-palette-2025?country=US",
+      "actions": [
+        {
+          "name": "acceptedCookie",
+          "selectors": [
+            "#csm-close-btn"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[⏳] Accepting cookie policy..."
+        },
+        {
+          "name": "addToCart",
+          "selectors": [
+            ".product__form-button.js-productFormSubmit"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[🛒] Adding product to cart..."
+        },
+        {
+          "name": "checkout",
+          "selectors": [
+            "#checkout-button"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[💳] Proceeding to checkout..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 10000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[✅] Checking coupon code..."
+        }
+      ],
+      "waitTime": 5000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
+      }
+    },
+    "us.suunto.com": {
+      "baseUrl": "https://www.us.suunto.com",
+      "productUrl": "https://us.suunto.com/products/suunto-aqua-light-reef-blue",
+      "actions": [
+        {
+          "name": "acceptedCookie",
+          "selectors": [
+            "#onetrust-accept-btn-handler"
+          ],
+          "type": "click",
+          "waitAfter": 20000,
+          "event": "[⏳] Accepting cookie policy..."
+        },
+        {
+          "name": "declineModal",
+          "selectors": [
+            ".klaviyo-close-form"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[❌] Closing modal..."
+        },
+        {
+          "name": "buyNow",
+          "selectors": [
+            ".shopify-payment-button__button"
+          ],
+          "type": "click",
+          "waitAfter": 10000,
+          "event": "[🚀] Buy Now clicked..."
+        },
+        {
+          "name": "enterCoupon",
+          "selectors": [
+            "input[name=\"reductions\"]"
+          ],
+          "type": "fill",
+          "waitAfter": 5000,
+          "event": "[💳] Entering coupon code..."
+        },
+        {
+          "name": "checkCoupon",
+          "selectors": [
+            "button[aria-label=\"Apply Discount Code\"]"
+          ],
+          "type": "click",
+          "waitAfter": 5000,
+          "event": "[✅] Checking coupon code..."
+        }
+      ],
+      "waitTime": 10000,
+      "promoCode": {
+        "elementAlert": "#app",
+        "validText": "TOTAL SAVINGS"
       }
     }
   }
+}
