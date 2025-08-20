@@ -139,7 +139,7 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
             stderr_text = ""
             
             try:
-                stdout, stderr = process.communicate(timeout=120)
+                stdout, stderr = process.communicate()
                 returncode = process.returncode
                 
                 # Decode output safely
@@ -153,11 +153,7 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
                 if stderr_text:
                     print(f"   stderr: {stderr_text[:100]}...")
                     
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-                stderr_text = "Validation timeout"
-                returncode = 1
+
             except Exception as e:
                 stderr_text = f"Process error: {str(e)}"
                 returncode = 1
