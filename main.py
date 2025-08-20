@@ -107,25 +107,30 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
         print(f"Validating coupon {i}/{len(coupon_codes)}: {coupon}")
         
         try:
-            # Run validator.js script for each coupon with proper encoding handling
-            startupinfo = None
-            if os.name == 'nt':  # Windows
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                startupinfo.wShowWindow = subprocess.SW_HIDE
-            
-            result = subprocess.run([
+            # Run validator.js script for each coupon using Popen for better encoding control
+            process = subprocess.Popen([
                 'node', 'validator.js',
                 f'--coupon={coupon}',
                 f'--domain={target_site}'
-            ], capture_output=True, timeout=None, startupinfo=startupinfo, env=dict(os.environ, PYTHONIOENCODING='utf-8'))
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+               creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
+               env=dict(os.environ, NODE_OPTIONS='--max-old-space-size=4096'))
+            
+            try:
+                stdout, stderr = process.communicate(timeout=120)  # 2 minute timeout
+                returncode = process.returncode
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                print(f"⏰ Validation timeout for {coupon}")
+                continue
             
             # Decode output manually to handle encoding issues
-            stdout = result.stdout.decode('utf-8', errors='ignore') if result.stdout else ""
-            stderr = result.stderr.decode('utf-8', errors='ignore') if result.stderr else ""
+            stdout_text = stdout.decode('utf-8', errors='ignore') if stdout else ""
+            stderr_text = stderr.decode('utf-8', errors='ignore') if stderr else ""
             
             # Check if validation was successful
-            if result.returncode == 0:
+            if returncode == 0:
                 # Parse the result.json file to check if coupon is valid
                 try:
                     with open('./output/result.json', 'r') as f:
@@ -153,7 +158,7 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
                 except json.JSONDecodeError:
                     print(f"⚠️ Invalid JSON in validation result for {coupon}")
             else:
-                print(f"⚠️ Validation failed for {coupon}: {stderr}")
+                print(f"⚠️ Validation failed for {coupon}: {stderr_text}")
                 
         except subprocess.TimeoutExpired:
             print(f"⏰ Validation timeout for {coupon}")
@@ -161,6 +166,14 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
             print(f"❌ Encoding error validating {coupon}: {str(e)}")
         except Exception as e:
             print(f"❌ Error validating {coupon}: {str(e)}")
+        finally:
+            # Ensure process is cleaned up
+            try:
+                if 'process' in locals() and process.poll() is None:
+                    process.terminate()
+                    process.wait(timeout=5)
+            except:
+                pass
     
     # Save valid coupons to JSON file
     with open('valid_coupons.json', 'w') as f:
