@@ -109,7 +109,7 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
                 'node', 'validator.js',
                 f'--coupon={coupon}',
                 f'--domain={target_site}'
-            ], capture_output=True, text=True, timeout=60)
+            ], capture_output=True, text=True, timeout=60, encoding='utf-8', errors='ignore')
             
             # Check if validation was successful
             if result.returncode == 0:
