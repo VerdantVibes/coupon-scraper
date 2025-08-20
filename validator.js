@@ -136,17 +136,32 @@ let page;
 
                 await page.waitForTimeout(siteConfig.waitTime);
 
-                const element = await page.$(siteConfig.codeValidation.element);
-                if (element) {
-                    const text = await element.innerText();
-                    if (text.includes(siteConfig.codeValidation.validText)) {
-                        log('[🎉🎉🎉] Coupon is valid!');
-                        couponIsValid = true;
-                    } else {
-                        log('[❌❌❌] Coupon is not valid.');
-                    }
+                // Check for validation using promoCode structure (for new format) or codeValidation (for old format)
+                const validationConfig = siteConfig.promoCode || siteConfig.codeValidation;
+                if (!validationConfig) {
+                    log('[❌❌❌] No validation configuration found');
+                    couponIsValid = false;
                 } else {
-                    log('[❌❌❌] Coupon is not valid.');
+                    const elementSelector = validationConfig.elementAlert || validationConfig.element;
+                    const validText = validationConfig.validText;
+                    
+                    if (!elementSelector || !validText) {
+                        log('[❌❌❌] Missing validation configuration');
+                        couponIsValid = false;
+                    } else {
+                        const element = await page.$(elementSelector);
+                        if (element) {
+                            const text = await element.innerText();
+                            if (text.includes(validText)) {
+                                log('[🎉🎉🎉] Coupon is valid!');
+                                couponIsValid = true;
+                            } else {
+                                log('[❌❌❌] Coupon is not valid.');
+                            }
+                        } else {
+                            log('[❌❌❌] Coupon is not valid.');
+                        }
+                    }
                 }
 
             } catch (e) {
