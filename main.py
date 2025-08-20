@@ -233,9 +233,16 @@ async def validate_coupons(coupon_codes: List[str], target_site: str, max_concur
             print("⏳ Waiting 2 seconds before next batch...")
             await asyncio.sleep(2)
     
-    # Save valid coupons to JSON file
+    # Save valid coupons to JSON file with simplified structure
+    simplified_coupons = []
+    for coupon in valid_coupons:
+        simplified_coupons.append({
+            "code": coupon['code'],
+            "site": coupon['site']
+        })
+    
     with open('valid_coupons.json', 'w') as f:
-        json.dump(valid_coupons, f, indent=2)
+        json.dump(simplified_coupons, f, indent=2)
     
     print(f"\nValidation complete! Found {len(valid_coupons)} valid coupons out of {len(coupon_codes)}")
     print("Valid coupons saved to valid_coupons.json")
