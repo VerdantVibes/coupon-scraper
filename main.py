@@ -152,6 +152,11 @@ except Exception as e:
                 f.write(temp_script)
                 temp_file = f.name
             
+            # Initialize variables
+            returncode = 1
+            stdout_text = ""
+            stderr_text = ""
+            
             try:
                 # Run the temporary script
                 result = subprocess.run([sys.executable, temp_file], 
@@ -159,9 +164,6 @@ except Exception as e:
                 
                 # Parse the output
                 output_lines = result.stdout.split('\n')
-                returncode = None
-                stdout_text = ""
-                stderr_text = ""
                 
                 for line in output_lines:
                     if line.startswith('RETURNCODE:'):
@@ -173,10 +175,10 @@ except Exception as e:
                     elif line.startswith('ERROR:'):
                         stderr_text = line.split(':', 1)[1] if ':' in line else ""
                         returncode = 1
-                
-                if returncode is None:
-                    returncode = 1
                     
+            except Exception as e:
+                stderr_text = f"Failed to run temporary script: {str(e)}"
+                returncode = 1
             finally:
                 # Clean up temporary file
                 try:
