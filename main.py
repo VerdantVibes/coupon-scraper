@@ -107,12 +107,22 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
         print(f"Validating coupon {i}/{len(coupon_codes)}: {coupon}")
         
         try:
-            # Run validator.js script for each coupon
+            # Run validator.js script for each coupon with proper encoding handling
+            startupinfo = None
+            if os.name == 'nt':  # Windows
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
+            
             result = subprocess.run([
                 'node', 'validator.js',
                 f'--coupon={coupon}',
                 f'--domain={target_site}'
-            ], capture_output=True, text=True, encoding='utf-8', errors='ignore')
+            ], capture_output=True, timeout=None, startupinfo=startupinfo, env=dict(os.environ, PYTHONIOENCODING='utf-8'))
+            
+            # Decode output manually to handle encoding issues
+            stdout = result.stdout.decode('utf-8', errors='ignore') if result.stdout else ""
+            stderr = result.stderr.decode('utf-8', errors='ignore') if result.stderr else ""
             
             # Check if validation was successful
             if result.returncode == 0:
@@ -143,10 +153,12 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
                 except json.JSONDecodeError:
                     print(f"⚠️ Invalid JSON in validation result for {coupon}")
             else:
-                print(f"⚠️ Validation failed for {coupon}: {result.stderr}")
+                print(f"⚠️ Validation failed for {coupon}: {stderr}")
                 
         except subprocess.TimeoutExpired:
             print(f"⏰ Validation timeout for {coupon}")
+        except UnicodeDecodeError as e:
+            print(f"❌ Encoding error validating {coupon}: {str(e)}")
         except Exception as e:
             print(f"❌ Error validating {coupon}: {str(e)}")
     
