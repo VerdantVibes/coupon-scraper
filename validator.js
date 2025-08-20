@@ -163,7 +163,13 @@ let page;
             fs.writeFileSync(`${outputDir}/result.json`, JSON.stringify({logs, couponIsValid}, null, 2));
             await browserCtx.close();
         }
-    })();
+        
+        // Ensure clean exit
+        process.exit(0);
+    })().catch(err => {
+        console.error('Script error:', err.message);
+        process.exit(1);
+    });
 
 async function clearSiteStorage(page) {
     log('🧹 [CLEANUP] Starting site data cleanup...');
@@ -215,13 +221,17 @@ async function clearSiteStorage(page) {
 
 }
 function log(message) {
-    console.log(message);
-    logs.push({ type: 'log', message, timestamp: new Date().toISOString() });
+    // Ensure message is properly encoded for console output
+    const safeMessage = typeof message === 'string' ? message.replace(/[^\x00-\x7F]/g, '?') : String(message);
+    console.log(safeMessage);
+    logs.push({ type: 'log', message: safeMessage, timestamp: new Date().toISOString() });
 }
 
 function error(message) {
-    console.error(message);
-    logs.push({ type: 'error', message, timestamp: new Date().toISOString() });
+    // Ensure message is properly encoded for console output
+    const safeMessage = typeof message === 'string' ? message.replace(/[^\x00-\x7F]/g, '?') : String(message);
+    console.error(safeMessage);
+    logs.push({ type: 'error', message: safeMessage, timestamp: new Date().toISOString() });
 }
 
 async function retryWaitForSelector(page, selector, options = {}, maxAttempts = 3, delayBetween = 1000, required = true) {
