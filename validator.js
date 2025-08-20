@@ -72,7 +72,7 @@ let page;
             const userDataDir = './pw-user';
 
             const browserCtx = await firefox.launchPersistentContext(userDataDir, {
-                headless: false,
+                headless: true,
                 ...(proxy && {proxy}),
                 locale: 'en-US',
                 userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.188 Safari/537.36',
