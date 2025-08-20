@@ -7,7 +7,12 @@ __pycache__/
 *.so
 
 # Custom files
-*.json
+coupon_codes.json
+valid_coupons.json
+response.json
+parsed_response.json
+output/
+node_modules/
 
 # Distribution / packaging
 .Python
