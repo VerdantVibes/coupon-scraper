@@ -54,8 +54,8 @@ async def save_to_database(site: str, code: str, valid: bool):
 async def get_response(site: str):
     print(f"Getting response for {site}")
     response = await client.responses.create(
-        model="gpt-5",
-        tools=[{"type": "web_search_preview"}],
+    model="gpt-5",
+    tools=[{"type": "web_search_preview"}],
         input=f"find all working coupon on {site}"
     )
     with open('response.json', 'w', encoding='utf-8') as f:
@@ -97,8 +97,8 @@ async def parse_response(response_text):
     
     return coupon_codes
 
-async def validate_single_coupon_parallel(coupon: str, target_site: str, index: int, total: int):
-    """Validate a single coupon in parallel"""
+async def validate_single_coupon(coupon: str, target_site: str, index: int, total: int):
+    """Validate a single coupon"""
     print(f"Validating coupon {index}/{total}: {coupon}")
     
     try:
@@ -136,18 +136,8 @@ async def validate_single_coupon_parallel(coupon: str, target_site: str, index: 
         if returncode == 0:
             # Parse the result.json file to check if coupon is valid
             try:
-                # Find the output directory for this process
-                output_dir = None
-                for item in os.listdir('.'):
-                    if item.startswith('./output-') or item.startswith('output-'):
-                        output_dir = item
-                        break
-                
-                if not output_dir or not os.path.exists(output_dir):
-                    print(f"⚠️ Output directory does not exist for {coupon}")
-                    return None
-                    
-                result_file = os.path.join(output_dir, 'result.json')
+                # Use fixed output directory
+                result_file = './output/result.json'
                 if not os.path.exists(result_file):
                     print(f"⚠️ result.json file does not exist for {coupon}")
                     return None
@@ -188,8 +178,8 @@ async def validate_single_coupon_parallel(coupon: str, target_site: str, index: 
         print(f"❌ Error validating {coupon}: {str(e)}")
         return None
 
-async def validate_coupons(coupon_codes: List[str], target_site: str, max_concurrent: int = 3):
-    """Validate coupons using parallel validator.js processes"""
+async def validate_coupons(coupon_codes: List[str], target_site: str):
+    """Validate coupons using validator.js"""
     valid_coupons = []
     
     # If coupon_codes is empty, try to load from existing JSON file
@@ -205,33 +195,24 @@ async def validate_coupons(coupon_codes: List[str], target_site: str, max_concur
             print("❌ Error reading coupon_codes.json file")
             return valid_coupons
     
-    print(f"Starting parallel validation for {len(coupon_codes)} coupons on {target_site}")
-    print(f"Running {max_concurrent} validations simultaneously")
+    print(f"Starting validation for {len(coupon_codes)} coupons on {target_site}")
     
-    # Process coupons in batches to control concurrency
-    for i in range(0, len(coupon_codes), max_concurrent):
-        batch = coupon_codes[i:i + max_concurrent]
-        batch_tasks = []
-        
-        for j, coupon in enumerate(batch):
-            task = validate_single_coupon_parallel(coupon, target_site, i + j + 1, len(coupon_codes))
-            batch_tasks.append(task)
-        
-        # Run batch in parallel
-        print(f"\n🔄 Running batch {i//max_concurrent + 1} ({len(batch)} coupons)...")
-        batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
-        
-        # Process results
-        for result in batch_results:
-            if isinstance(result, Exception):
-                print(f"❌ Exception in validation: {result}")
-            elif result is not None:
-                valid_coupons.append(result)
-        
-        # Small delay between batches to avoid overwhelming the system
-        if i + max_concurrent < len(coupon_codes):
-            print("⏳ Waiting 2 seconds before next batch...")
-            await asyncio.sleep(2)
+    # Process coupons one by one
+    print(f"🔄 Processing {len(coupon_codes)} coupons...")
+    results = []
+    for i, coupon in enumerate(coupon_codes):
+        result = await validate_single_coupon(coupon, target_site, i + 1, len(coupon_codes))
+        results.append(result)
+        # Small delay between validations to avoid conflicts
+        if i < len(coupon_codes) - 1:
+            await asyncio.sleep(1)
+    
+    # Process results
+    for result in results:
+        if isinstance(result, Exception):
+            print(f"❌ Exception in validation: {result}")
+        elif result is not None:
+            valid_coupons.append(result)
     
     # Save valid coupons to JSON file with simplified structure
     simplified_coupons = []
@@ -296,8 +277,8 @@ async def main():
     response = await get_response(target_site)
     coupon_codes = await parse_response(response.output_text)
     
-    # Validate coupons in parallel (3 at a time)
-    valid_coupons = await validate_coupons(coupon_codes, target_site, max_concurrent=3)
+    # Validate coupons
+    valid_coupons = await validate_coupons(coupon_codes, target_site)
     
     # Print summary
     print(f"\n=== SUMMARY ===")
