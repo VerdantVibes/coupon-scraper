@@ -120,37 +120,18 @@ async def validate_coupons(coupon_codes: List[str], target_site: str):
         print(f"Validating coupon {i}/{len(coupon_codes)}: {coupon}")
         
         try:
-            # Run validator.js script for each coupon using a more robust approach
-            import tempfile
-            import sys
+            # Set environment variables for better encoding handling
+            env = os.environ.copy()
+            env['PYTHONIOENCODING'] = 'utf-8'
+            env['NODE_OPTIONS'] = '--max-old-space-size=4096'
             
-            # Create a temporary script to handle encoding properly
-            temp_script = f"""
-import subprocess
-import sys
-import os
-
-try:
-    result = subprocess.run([
-        'node', 'validator.js',
-        '--coupon={coupon}',
-        '--domain={target_site}'
-    ], capture_output=True, text=True, encoding='utf-8', errors='ignore', 
-       env=dict(os.environ, NODE_OPTIONS='--max-old-space-size=4096'))
-    
-    print(f"RETURNCODE:{result.returncode}")
-    print(f"STDOUT:{result.stdout}")
-    print(f"STDERR:{result.stderr}")
-    sys.exit(0)
-except Exception as e:
-    print(f"ERROR:{str(e)}")
-    sys.exit(1)
-"""
-            
-            # Write temporary script
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
-                f.write(temp_script)
-                temp_file = f.name
+            # Run the validator directly
+            process = subprocess.Popen([
+                'node', 'validator.js',
+                f'--coupon={coupon}',
+                f'--domain={target_site}'
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+               env=env, creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
             
             # Initialize variables
             returncode = 1
@@ -158,38 +139,44 @@ except Exception as e:
             stderr_text = ""
             
             try:
-                # Run the temporary script
-                result = subprocess.run([sys.executable, temp_file], 
-                                      capture_output=True, text=True, encoding='utf-8', errors='ignore')
+                stdout, stderr = process.communicate(timeout=120)
+                returncode = process.returncode
                 
-                # Parse the output
-                output_lines = result.stdout.split('\n')
+                # Decode output safely
+                stdout_text = stdout.decode('utf-8', errors='ignore') if stdout else ""
+                stderr_text = stderr.decode('utf-8', errors='ignore') if stderr else ""
                 
-                for line in output_lines:
-                    if line.startswith('RETURNCODE:'):
-                        returncode = int(line.split(':', 1)[1])
-                    elif line.startswith('STDOUT:'):
-                        stdout_text = line.split(':', 1)[1] if ':' in line else ""
-                    elif line.startswith('STDERR:'):
-                        stderr_text = line.split(':', 1)[1] if ':' in line else ""
-                    elif line.startswith('ERROR:'):
-                        stderr_text = line.split(':', 1)[1] if ':' in line else ""
-                        returncode = 1
+                # Debug output
+                print(f"   Return code: {returncode}")
+                if stdout_text:
+                    print(f"   stdout: {stdout_text[:100]}...")
+                if stderr_text:
+                    print(f"   stderr: {stderr_text[:100]}...")
                     
-            except Exception as e:
-                stderr_text = f"Failed to run temporary script: {str(e)}"
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                stderr_text = "Validation timeout"
                 returncode = 1
-            finally:
-                # Clean up temporary file
-                try:
-                    os.unlink(temp_file)
-                except:
-                    pass
+            except Exception as e:
+                stderr_text = f"Process error: {str(e)}"
+                returncode = 1
             
             # Check if validation was successful
             if returncode == 0:
                 # Parse the result.json file to check if coupon is valid
                 try:
+                    # Check if output directory exists
+                    if not os.path.exists('./output'):
+                        print(f"⚠️ Output directory does not exist for {coupon}")
+                        continue
+                        
+                    if not os.path.exists('./output/result.json'):
+                        print(f"⚠️ result.json file does not exist for {coupon}")
+                        print(f"   stdout: {stdout_text[:200]}...")
+                        print(f"   stderr: {stderr_text[:200]}...")
+                        continue
+                        
                     with open('./output/result.json', 'r') as f:
                         validation_result = json.load(f)
                     
@@ -217,10 +204,6 @@ except Exception as e:
             else:
                 print(f"⚠️ Validation failed for {coupon}: {stderr_text}")
                 
-        except subprocess.TimeoutExpired:
-            print(f"⏰ Validation timeout for {coupon}")
-        except UnicodeDecodeError as e:
-            print(f"❌ Encoding error validating {coupon}: {str(e)}")
         except Exception as e:
             print(f"❌ Error validating {coupon}: {str(e)}")
     
@@ -234,7 +217,7 @@ except Exception as e:
     return valid_coupons
 
 async def main():
-    target_site = "https://www.woxer.com"
+    target_site = "woxer.com"
     
     # Get coupon codes
     # response = await get_response(target_site)
