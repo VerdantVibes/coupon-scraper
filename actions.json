@@ -299,16 +299,22 @@
         "validText": "You Save"
       }
     },
-    "myprotein.ro": {
-      "baseUrl": "https://www.myprotein.ro",
-      "productUrl": "",
-      "actions": [],
-      "waitTime": 5000,
-      "promoCode": {
-        "elementAlert": "",
-        "validText": "CODE_VALID"
-      }
-    },
+     "myprotein.ro": {
+        "baseUrl": "https://www.myprotein.ro",
+        "productUrl": "https://www.myprotein.ro/p/sports-nutrition/impact-whey-isolate/12456855/",
+        "actions": [
+          { "name": "acceptedCookie", "selectors": ["#onetrust-accept-btn-handler"], "type": "click", "waitAfter": 3000, "event" : "[⏳] Accepting cookie policy..." },
+          { "name": "addToCart", "selectors": ["#add-to-basket-text"], "type": "click", "waitAfter": 5000, "event" : "[🛒] Adding product to cart..." },
+          { "name": "viewCart", "selectors": ["#view-basket-btn"], "type": "click", "waitAfter": 5000, "event" : "[🛍️] Viewing cart..." },
+          { "name": "enterCoupon", "selectors": ["#promo-code-input"], "type": "fill", "waitAfter": 5000, "event" : "[💳] Entering coupon code..." },
+          { "name": "checkCoupon", "selectors": ["#promo-code-add"], "type": "click", "waitAfter": 5000, "event" : "[✅] Checking coupon code..." }
+        ],
+        "waitTime": 3000,
+        "promoCode": {
+          "elementAlert": "#promo-error-message",
+          "validText": "Ai primit"
+        }
+      },
     "woxer.com": {
       "baseUrl": "https://www.woxer.com",
       "productUrl": "https://woxer.com/products/baller-volt-floral",
